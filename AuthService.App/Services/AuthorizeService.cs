@@ -31,11 +31,9 @@ namespace AuthService.App.Services
             var user = _context.Users.FirstOrDefault(u => u.Email == request.Email);
             if (user == null) throw new Exception("Пользователь не найден");
 
-            // 1. Генерация токенов
             var accessToken = GenerateJwtToken(user);
             var refreshToken = GenerateRefreshToken();
 
-            // 2. Сохранение refresh-токена (заглушка)
             var newRefreshToken = new RefreshToken
             {
                 Token = refreshToken,
@@ -47,7 +45,7 @@ namespace AuthService.App.Services
             await _context.RefreshTokens.AddAsync(domainRefreshToken);
             await _context.SaveChangesAsync();
 
-            return new TokenResponse(accessToken, refreshToken, 60*120);
+            return new TokenResponse(accessToken, 60*120);
         }
 
         public async Task<TokenResponse> Registration(LoginRequest request)
@@ -66,34 +64,34 @@ namespace AuthService.App.Services
             return await GenerateTokens(user);
         }
         
-        public async Task<TokenResponse> RefreshTokenAsync(string refreshToken)
-        {
-            var existingToken = await _context.RefreshTokens
-                .FirstOrDefaultAsync(rt => rt.Token == refreshToken);
+        // public async Task<TokenResponse> RefreshTokenAsync(string refreshToken)
+        // {
+        //     var existingToken = await _context.RefreshTokens
+        //         .FirstOrDefaultAsync(rt => rt.Token == refreshToken);
 
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == existingToken.UserId);
+        //     var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == existingToken.UserId);
 
-            if (existingToken == null)
-                throw new SecurityTokenException("Invalid refresh token");
+        //     if (existingToken == null)
+        //         throw new SecurityTokenException("Invalid refresh token");
             
-            if (existingToken.IsRevoked || existingToken.ExpiresAt < DateTime.UtcNow)
-                throw new SecurityTokenException("Expired or revoked token");
+        //     if (existingToken.IsRevoked || existingToken.ExpiresAt < DateTime.UtcNow)
+        //         throw new SecurityTokenException("Expired or revoked token");
 
-            existingToken.IsRevoked = true;
+        //     existingToken.IsRevoked = true;
 
-            var newRefreshToken = new Domain.Entities.RefreshToken
-            {
-                Token = GenerateRefreshToken(),
-                ExpiresAt = DateTime.UtcNow.AddDays(7),
-                UserId = existingToken.UserId
-            };
+        //     var newRefreshToken = new Domain.Entities.RefreshToken
+        //     {
+        //         Token = GenerateRefreshToken(),
+        //         ExpiresAt = DateTime.UtcNow.AddDays(7),
+        //         UserId = existingToken.UserId
+        //     };
 
-            _context.RefreshTokens.Update(existingToken);
-            await _context.RefreshTokens.AddAsync(newRefreshToken);
-            await _context.SaveChangesAsync();
+        //     _context.RefreshTokens.Update(existingToken);
+        //     await _context.RefreshTokens.AddAsync(newRefreshToken);
+        //     await _context.SaveChangesAsync();
 
-            return new TokenResponse(GenerateJwtToken(user), newRefreshToken.Token, 60*120);
-        }
+        //     return new TokenResponse(GenerateJwtToken(user), newRefreshToken.Token, 60*120);
+        // }
 
         private async Task<TokenResponse> GenerateTokens(User user)
         {
@@ -111,7 +109,7 @@ namespace AuthService.App.Services
             await _context.RefreshTokens.AddAsync(domainRefreshToken);
             await _context.SaveChangesAsync();
 
-            return new TokenResponse(accessToken, refreshToken, 60*120);
+            return new TokenResponse(accessToken, 60*120);
         }
 
         private string GenerateJwtToken(User user)

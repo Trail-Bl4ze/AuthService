@@ -6,5 +6,5 @@ public interface IAuthorizeService
 {
     Task<TokenResponse> Login(LoginRequest request);
     Task<TokenResponse> Registration(LoginRequest request);
-    Task<TokenResponse> RefreshTokenAsync(string refreshToken);
+    //Task<TokenResponse> RefreshTokenAsync(string refreshToken);
 }
