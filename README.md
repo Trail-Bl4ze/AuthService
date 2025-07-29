@@ -3,7 +3,7 @@
 export DB_PASSWORD="" - потом поставлю, неважно (недеюсь никто не заберет бд :) ).
 
 Docker:
-git clone link -b branchName
+git clone link -b branchName \n
 Из корня проекта
 docker build -t auth_service .
 docker run -d -p 5000:80 --name auth-container auth_service
