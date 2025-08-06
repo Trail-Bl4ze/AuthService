@@ -20,7 +20,6 @@ services.AddControllers();
 services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(configuration["Database:ConnectionStrings:Default"])
            .UseSnakeCaseNamingConvention());
-Console.WriteLine($"Actual connection string: {configuration["Database:ConnectionStrings:Default"]}");
 
 // Настройка аутентификации
 var authenticationSettingsSection = configuration.GetSection("AuthenticationSettings");
