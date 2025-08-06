@@ -1,0 +1,89 @@
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
+using Auth.Core.Interfaces;
+using Auth.Core.Models;
+using Auth.Infrastructure.Data;
+using Auth.Infrastructure.Repositories;
+using Auth.Infrastructure.Services;
+
+var builder = WebApplication.CreateBuilder(args);
+
+// Конфигурация сервисов
+var services = builder.Services;
+var configuration = builder.Configuration;
+
+services.AddControllers();
+
+// Настройка базы данных
+services.AddDbContext<AppDbContext>(options =>
+    options.UseNpgsql(configuration["Database:ConnectionStrings:Default"])
+           .UseSnakeCaseNamingConvention());
+Console.WriteLine($"Actual connection string: {configuration["Database:ConnectionStrings:Default"]}");
+
+// Настройка аутентификации
+var authenticationSettingsSection = configuration.GetSection("AuthenticationSettings");
+services.Configure<AuthenticationSettings>(authenticationSettingsSection);
+
+var authenticationSettings = authenticationSettingsSection.Get<AuthenticationSettings>();
+var key = Encoding.ASCII.GetBytes(authenticationSettings.Secret);
+
+services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+.AddJwtBearer(options => 
+{
+    options.RequireHttpsMetadata = false;
+    options.SaveToken = true;
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuerSigningKey = true,
+        IssuerSigningKey = new SymmetricSecurityKey(key),
+        ValidateIssuer = false,
+        ValidateAudience = false
+    };
+});
+
+// Регистрация репозиториев и сервисов
+services.AddScoped<IUsersRepository, UsersRepository>();
+services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
+services.AddScoped<IAuthenticationService, AuthenticationService>();
+services.AddSingleton<IPasswordHasher, BcryptPasswordHasher>();
+services.AddScoped<ITokenService, JwtTokenService>();
+
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+
+var app = builder.Build();
+
+if (app.Environment.IsDevelopment())
+{
+    app.UseDeveloperExceptionPage();
+}
+else
+{
+    app.UseHsts();
+}
+
+app.UseCors(builder => builder
+    .AllowAnyOrigin()
+    .AllowAnyMethod()
+    .AllowAnyHeader());
+
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
+
+app.UseHttpsRedirection();
+app.UseRouting();
+app.UseAuthentication();
+app.UseAuthorization();
+
+app.MapControllers();
+
+app.Run();
