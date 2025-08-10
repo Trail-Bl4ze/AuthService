@@ -5,10 +5,6 @@ using Auth.Infrastructure.Data;
 using Auth.Infrastructure.Repositories;
 using Auth.Infrastructure.Services;
 
-public class Program
-{
-    static void Main(string[] args)
-    {
         var builder = WebApplication.CreateBuilder(args);
 
         // Конфигурация сервисов
@@ -64,5 +60,3 @@ public class Program
         app.MapControllers();
 
         app.Run();
-    }
-}
