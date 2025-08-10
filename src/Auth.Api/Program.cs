@@ -25,27 +25,6 @@ services.AddDbContext<AppDbContext>(options =>
 var authenticationSettingsSection = configuration.GetSection("AuthenticationSettings");
 services.Configure<AuthenticationSettings>(authenticationSettingsSection);
 
-var authenticationSettings = authenticationSettingsSection.Get<AuthenticationSettings>();
-var key = Encoding.ASCII.GetBytes(authenticationSettings.Secret);
-
-services.AddAuthentication(options =>
-{
-    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-})
-.AddJwtBearer(options => 
-{
-    options.RequireHttpsMetadata = false;
-    options.SaveToken = true;
-    options.TokenValidationParameters = new TokenValidationParameters
-    {
-        ValidateIssuerSigningKey = true,
-        IssuerSigningKey = new SymmetricSecurityKey(key),
-        ValidateIssuer = false,
-        ValidateAudience = false
-    };
-});
-
 // Регистрация репозиториев и сервисов
 services.AddScoped<IUsersRepository, UsersRepository>();
 services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();

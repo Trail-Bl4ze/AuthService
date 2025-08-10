@@ -72,11 +72,13 @@ namespace Auth.Infrastructure.Services
             {
                 Subject = new ClaimsIdentity(new Claim[]
                 {
-                    new Claim(ClaimTypes.NameIdentifier, userDetails.Id.ToString()),
-                    new Claim(ClaimTypes.Email, userDetails.Email)
+                    new Claim(JwtRegisteredClaimNames.Sub, userDetails.Id.ToString()),
+                    new Claim(JwtRegisteredClaimNames.Email, userDetails.Email)
                 }),
                 Expires = expires,
-                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
+                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature),
+                Issuer = _authenticationSettings.Issuer,
+                Audience = _authenticationSettings.Audience
             };
 
             var accessToken = this._tokenHandler.CreateToken(tokenDescriptor);
