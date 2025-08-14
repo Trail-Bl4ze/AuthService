@@ -4,8 +4,9 @@ using Auth.Core.Models;
 using Auth.Infrastructure.Data;
 using Auth.Infrastructure.Repositories;
 using Auth.Infrastructure.Services;
+using Microsoft.Net.Http.Headers;
 
-        var builder = WebApplication.CreateBuilder(args);
+var builder = WebApplication.CreateBuilder(args);
 
         // Конфигурация сервисов
         var services = builder.Services;
@@ -46,7 +47,7 @@ using Auth.Infrastructure.Services;
         app.UseCors(builder => builder
             .WithOrigins("http://localhost:3006")
             .AllowAnyMethod()
-            .WithHeaders());
+            .WithHeaders(HeaderNames.ContentType));
 
 
         app.UseSwagger();
