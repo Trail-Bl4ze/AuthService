@@ -44,9 +44,9 @@ using Auth.Infrastructure.Services;
         }
 
         app.UseCors(builder => builder
-            .WithOrigins("https://localhost:3006")
+            .WithOrigins("http://localhost:3006")
             .AllowAnyMethod()
-            .WithHeaders("https://localhost:3006"));
+            .WithHeaders());
 
 
         app.UseSwagger();
